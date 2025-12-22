@@ -1,0 +1,49 @@
+import numpy as np
+
+# Prediction function (hypothesis)
+def predict(X, weights, bias):
+    return X * weights + bias
+
+# Mean Squared Error cost
+def compute_cost(X, y, weights, bias):
+    m = len(y)
+    predictions = predict(X, weights, bias)
+    return (1/(2*m)) * np.sum((predictions - y) ** 2)
+
+# Gradient Descent
+def train_linear_regression(X, y, lr=0.01, iterations=1000):
+    m = len(y)
+    weights = 0.0
+    bias = 0.0
+    
+    for i in range(iterations):
+        predictions = predict(X, weights, bias)
+        
+        # Partial derivatives
+        dw = (1/m) * np.sum((predictions - y) * X)
+        db = (1/m) * np.sum(predictions - y)
+        
+        # Update parameters
+        weights -= lr * dw
+        bias -= lr * db
+        
+        if i % (iterations // 10) == 0:
+            cost = compute_cost(X, y, weights, bias)
+            print(f"Iteration {i:>4} | Cost: {cost:.4f}")
+
+    return weights, bias
+
+# Example data
+X = np.array([1, 2, 3, 4, 5])       # feature
+y = np.array([2, 4, 5, 4, 5])       # target
+
+# Train model
+weights, bias = train_linear_regression(X, y, lr=0.01, iterations=1000)
+print("\nTrained weight:", weights)
+print("Trained bias:", bias)
+
+# Predictions
+print("\nPredictions:")
+for val in X:
+    pred = predict(val, weights, bias)
+    print(f"x={val} => y_pred={pred:.2f}")
