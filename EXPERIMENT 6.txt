@@ -1,0 +1,92 @@
+# Naïve Bayes Classification WITHOUT sklearn
+
+# Dataset
+# Features: [Outlook, Temperature, Humidity, Wind]
+# Labels: Yes / No
+
+X = [
+    ['Sunny', 'Hot', 'High', 'Weak'],
+    ['Sunny', 'Hot', 'High', 'Strong'],
+    ['Overcast', 'Hot', 'High', 'Weak'],
+    ['Rain', 'Mild', 'High', 'Weak'],
+    ['Rain', 'Cool', 'Normal', 'Weak'],
+    ['Rain', 'Cool', 'Normal', 'Strong'],
+    ['Overcast', 'Cool', 'Normal', 'Strong'],
+    ['Sunny', 'Mild', 'High', 'Weak'],
+    ['Sunny', 'Cool', 'Normal', 'Weak'],
+    ['Rain', 'Mild', 'Normal', 'Weak'],
+    ['Sunny', 'Mild', 'Normal', 'Strong'],
+    ['Overcast', 'Mild', 'High', 'Strong'],
+    ['Overcast', 'Hot', 'Normal', 'Weak'],
+    ['Rain', 'Mild', 'High', 'Strong']
+]
+
+y = [
+    'No', 'No', 'Yes', 'Yes', 'Yes', 'No', 'Yes',
+    'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'No'
+]
+
+# Split data manually
+X_train = X[:10]
+y_train = y[:10]
+X_test = X[10:]
+y_test = y[10:]
+
+# Train Naïve Bayes
+def train_naive_bayes(X, y):
+    model = {}
+    classes = set(y)
+
+    for cls in classes:
+        model[cls] = {'count': y.count(cls), 'features': []}
+
+        for i in range(len(X[0])):
+            feature_values = [X[j][i] for j in range(len(X)) if y[j] == cls]
+            model[cls]['features'].append(feature_values)
+
+    return model
+
+# Predict
+def predict(model, sample):
+    probabilities = {}
+
+    for cls in model:
+        prob = model[cls]['count'] / sum(m['count'] for m in model.values())
+
+        for i, value in enumerate(sample):
+            count = model[cls]['features'][i].count(value)
+            total = len(model[cls]['features'][i])
+            prob *= (count + 1) / (total + len(set(model[cls]['features'][i])))
+
+        probabilities[cls] = prob
+
+    return max(probabilities, key=probabilities.get)
+
+# Train model
+model = train_naive_bayes(X_train, y_train)
+
+# Test model
+y_pred = []
+for sample in X_test:
+    y_pred.append(predict(model, sample))
+
+# Confusion Matrix
+TP = TN = FP = FN = 0
+
+for actual, predicted in zip(y_test, y_pred):
+    if actual == 'Yes' and predicted == 'Yes':
+        TP += 1
+    elif actual == 'No' and predicted == 'No':
+        TN += 1
+    elif actual == 'No' and predicted == 'Yes':
+        FP += 1
+    elif actual == 'Yes' and predicted == 'No':
+        FN += 1
+
+print("Confusion Matrix")
+print("TP:", TP, "FP:", FP)
+print("FN:", FN, "TN:", TN)
+
+# Accuracy
+accuracy = (TP + TN) / (TP + TN + FP + FN)
+print("\nAccuracy:", accuracy)

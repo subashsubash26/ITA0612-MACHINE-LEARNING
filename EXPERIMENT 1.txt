@@ -1,0 +1,63 @@
+# Candidate Elimination Algorithm
+# Training data is BUILT-IN (no CSV file needed)
+
+def candidate_elimination(data):
+    n = len(data[0]) - 1   # number of attributes
+
+    # Initialize S and G
+    S = ['0'] * n
+    G = [['?'] * n]
+
+    for example in data:
+        X = example[:-1]
+        y = example[-1]
+
+        # POSITIVE EXAMPLE
+        if y == 'Yes':
+            for i in range(n):
+                if S[i] == '0':
+                    S[i] = X[i]
+                elif S[i] != X[i]:
+                    S[i] = '?'
+
+            G = [g for g in G if all(g[i] == '?' or g[i] == X[i] for i in range(n))]
+
+        # NEGATIVE EXAMPLE
+        else:
+            new_G = []
+            for g in G:
+                if all(g[i] == '?' or g[i] == X[i] for i in range(n)):
+                    for i in range(n):
+                        if g[i] == '?' and S[i] != X[i]:
+                            h = g.copy()
+                            h[i] = S[i]
+                            new_G.append(h)
+                else:
+                    new_G.append(g)
+            G = new_G
+
+        print("\nTraining Example:", example)
+        print("Specific Hypothesis (S):", S)
+        print("General Hypothesis (G):", G)
+
+    return S, G
+
+
+# ---------------- TRAINING DATA ----------------
+# (Built directly into the program)
+
+training_data = [
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Rainy', 'Cold', 'High', 'Strong', 'Warm', 'Change', 'No'],
+    ['Sunny', 'Warm', 'High', 'Strong', 'Cool', 'Change', 'Yes']
+]
+
+# Run algorithm
+S_final, G_final = candidate_elimination(training_data)
+
+print("\nFINAL RESULT")
+print("Final Specific Hypothesis (S):", S_final)
+print("Final General Hypotheses (G):")
+for g in G_final:
+    print(g)
