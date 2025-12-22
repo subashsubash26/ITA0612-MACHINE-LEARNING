@@ -1,0 +1,56 @@
+import math
+from collections import Counter
+
+# Calculate Euclidean distance
+def euclidean_distance(p1, p2):
+    distance = 0
+    for i in range(len(p1)):
+        distance += (p1[i] - p2[i]) ** 2
+    return math.sqrt(distance)
+
+# K-NN Algorithm
+def knn(training_data, training_labels, test_point, k):
+    distances = []
+
+    # Compute distance from test point to all training points
+    for i in range(len(training_data)):
+        dist = euclidean_distance(training_data[i], test_point)
+        distances.append((dist, training_labels[i]))
+
+    # Sort based on distance
+    distances.sort(key=lambda x: x[0])
+
+    # Take k nearest neighbors
+    k_nearest_labels = [label for (_, label) in distances[:k]]
+
+    # Majority voting
+    predicted_label = Counter(k_nearest_labels).most_common(1)[0][0]
+    return predicted_label
+
+
+# ---------------- DATASET ----------------
+# Simple numeric dataset
+# Features: [Height, Weight]
+training_data = [
+    [160, 55],
+    [165, 60],
+    [170, 65],
+    [175, 70],
+    [180, 75]
+]
+
+# Class labels
+training_labels = ['A', 'A', 'B', 'B', 'B']
+
+# New sample to classify
+test_sample = [172, 68]
+k = 3
+
+# Run K-NN
+result = knn(training_data, training_labels, test_sample, k)
+
+print("Training Data:", training_data)
+print("Training Labels:", training_labels)
+print("Test Sample:", test_sample)
+print("Value of k:", k)
+print("Predicted Class:", result)
