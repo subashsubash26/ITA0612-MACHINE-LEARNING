@@ -1,0 +1,54 @@
+import math
+
+# Sigmoid function
+def sigmoid(z):
+    return 1 / (1 + math.exp(-z))
+
+# Train Logistic Regression on tiny dataset
+data = [
+    [1, 0],  # 1 hour studied → fail
+    [2, 0],
+    [3, 0],
+    [4, 1],  # 4 hours studied → pass
+    [5, 1],
+    [6, 1]
+]
+
+# Separate features and labels
+X = [row[0] for row in data]
+y = [row[1] for row in data]
+
+# Initialize weight and bias
+weight = 0.0
+bias = 0.0
+lr = 0.1
+
+# Gradient descent
+for epoch in range(1000):
+    dw = 0
+    db = 0
+    loss = 0
+    for xi, yi in zip(X, y):
+        z = weight * xi + bias
+        pred = sigmoid(z)
+        # gradients
+        dw += (pred - yi) * xi
+        db += (pred - yi)
+        # log-loss
+        loss += - (yi * math.log(pred + 1e-9) + (1 - yi) * math.log(1 - pred + 1e-9))
+    weight -= lr * dw
+    bias -= lr * db
+    if epoch % 200 == 0:
+        print(f"Epoch {epoch:>3} — Loss: {loss:.4f}")
+
+print("\nTrained weight:", weight, "bias:", bias)
+
+# Predict function
+def predict(hours):
+    prob = sigmoid(weight * hours + bias)
+    return 1 if prob >= 0.5 else 0, prob
+
+# Example predictions
+for hrs in [2, 3.5, 5]:
+    label, prob = predict(hrs)
+    print(f"Hours {hrs}: probability={prob:.2f} → predicted={label}")
