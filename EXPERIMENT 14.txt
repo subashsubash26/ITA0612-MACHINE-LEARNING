@@ -1,0 +1,67 @@
+import numpy as np
+
+# -----------------------------
+# 1) Example Casa Price Data
+# -----------------------------
+# Columns: [size_sqft, bedrooms, age_years]
+# Target: price in $1000s
+data = np.array([
+    [1500, 3, 10, 300],
+    [2000, 4, 5, 450],
+    [850, 2, 20, 150],
+    [1200, 3, 15, 250],
+    [1800, 4, 7, 400],
+    [950, 2, 30, 130],
+    [2200, 5, 2, 500],
+    [1100, 3, 18, 240]
+], dtype=float)
+
+X = data[:, :3]   # features
+y = data[:, 3]    # prices
+
+print("Raw features:\n", X)
+print("Raw prices:\n", y)
+
+# --------------------------------
+# 2) Feature Scaling (normalization)
+# --------------------------------
+X_min = X.min(axis=0)
+X_max = X.max(axis=0)
+X_scaled = (X - X_min) / (X_max - X_min)
+
+# --------------------------------
+# 3) Add bias term (intercept)
+# --------------------------------
+X_scaled = np.hstack((np.ones((X_scaled.shape[0], 1)), X_scaled))
+
+# --------------------------------
+# 4) Train Linear Regression
+# --------------------------------
+# Normal Equation: theta = (X^T X)^(-1) X^T y
+theta = np.linalg.inv(X_scaled.T @ X_scaled) @ X_scaled.T @ y
+print("\nLearned coefficients (theta):\n", theta)
+
+# --------------------------------
+# 5) Make predictions on training set
+# --------------------------------
+y_pred_train = X_scaled @ theta
+print("\nPredicted prices (training set):", y_pred_train)
+
+# Compute training RMSE (error)
+rmse = np.sqrt(np.mean((y_pred_train - y) ** 2))
+print("Training RMSE:", round(rmse, 2), "thousands")
+
+# --------------------------------
+# 6) Predict for NEW Houses
+# --------------------------------
+new_houses = np.array([
+    [1600, 3, 12],   # House A
+    [2500, 4,  4]    # House B
+], dtype=float)
+
+new_scaled = (new_houses - X_min) / (X_max - X_min)
+new_scaled = np.hstack((np.ones((new_scaled.shape[0],1)), new_scaled))
+
+new_predictions = new_scaled @ theta
+for i, price in enumerate(new_predictions):
+    print(f"Predicted price for house {i+1}:", round(price,2), "thousands")
