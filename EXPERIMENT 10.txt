@@ -1,0 +1,63 @@
+import numpy as np
+
+# Initialize parameters: means, variances, mixing weights
+def initialize_params(X, k):
+    means = np.random.choice(X.flatten(), k)
+    variances = np.ones(k)
+    weights = np.ones(k) / k
+    return means, variances, weights
+
+# Gaussian PDF
+def gaussian_pdf(x, mean, var):
+    return (1.0 / np.sqrt(2*np.pi*var)) * np.exp(-((x - mean)**2) / (2*var))
+
+# E-step: compute responsibilities
+def e_step(X, means, variances, weights):
+    n = X.shape[0]
+    k = len(means)
+    responsibilities = np.zeros((n, k))
+    
+    for i in range(k):
+        responsibilities[:, i] = weights[i] * gaussian_pdf(X, means[i], variances[i])
+        
+    # Normalize to ensure each row sums to 1
+    responsibilities /= responsibilities.sum(axis=1, keepdims=True)
+    return responsibilities
+
+# M-step: update means, variances, and weights
+def m_step(X, responsibilities):
+    n, k = responsibilities.shape
+    means = np.zeros(k)
+    variances = np.zeros(k)
+    weights = np.zeros(k)
+
+    for i in range(k):
+        resp = responsibilities[:, i]
+        total_resp = resp.sum()
+        means[i] = np.dot(resp, X) / total_resp
+        variances[i] = np.dot(resp, (X - means[i])**2) / total_resp
+        weights[i] = total_resp / n
+
+    return means, variances, weights
+
+# Run EM algorithm
+def run_em(X, k=2, iterations=50):
+    means, variances, weights = initialize_params(X, k)
+
+    for _ in range(iterations):
+        responsibilities = e_step(X, means, variances, weights)
+        means, variances, weights = m_step(X, responsibilities)
+    
+    return means, variances, weights, responsibilities
+
+# Example data (two clusters)
+np.random.seed(0)
+data1 = np.random.normal(0, 1, 150)
+data2 = np.random.normal(5, 1.5, 150)
+X = np.hstack((data1, data2)).reshape(-1)
+
+means, variances, weights, responsibilities = run_em(X, k=2, iterations=100)
+
+print("Means:", means)
+print("Variances:", variances)
+print("Weights:", weights)
