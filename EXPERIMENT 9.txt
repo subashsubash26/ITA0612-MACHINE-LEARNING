@@ -1,0 +1,37 @@
+import numpy as np
+
+# Sample data (y = x^2)
+X = np.array([1, 2, 3, 4, 5])
+y = np.array([1, 4, 9, 16, 25])
+
+# ---- LINEAR REGRESSION (degree 1) ----
+# Create design matrix for linear: [1, x]
+X_linear = np.vstack((np.ones_like(X), X)).T
+
+# Normal equation: θ = (X^T X)^-1 X^T y
+theta_linear = np.linalg.inv(X_linear.T @ X_linear) @ X_linear.T @ y
+
+# Predictions
+y_pred_linear = X_linear @ theta_linear
+
+# Compute MSE
+mse_linear = np.mean((y - y_pred_linear) ** 2)
+
+# ---- POLYNOMIAL REGRESSION (degree 2) ----
+# Design matrix for polynomial: [1, x, x^2]
+X_poly = np.vstack((np.ones_like(X), X, X**2)).T
+
+theta_poly = np.linalg.inv(X_poly.T @ X_poly) @ X_poly.T @ y
+y_pred_poly = X_poly @ theta_poly
+mse_poly = np.mean((y - y_pred_poly) ** 2)
+
+# ---- OUTPUT RESULTS ----
+print("Linear Regression")
+print("  Coefficients:", theta_linear.tolist())
+print("  Predictions:", [round(val,2) for val in y_pred_linear.tolist()])
+print("  MSE:", round(mse_linear, 4))
+
+print("\nPolynomial Regression (degree 2)")
+print("  Coefficients:", theta_poly.tolist())
+print("  Predictions:", [round(val,2) for val in y_pred_poly.tolist()])
+print("  MSE:", round(mse_poly, 4))
