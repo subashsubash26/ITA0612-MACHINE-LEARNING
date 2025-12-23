@@ -1,0 +1,63 @@
+import numpy as np
+
+# Hard-coded Iris dataset (first 150 rows, 4 features + label)
+# (Only a subset shown here for brevity; full 150 lines should be included in practice)
+iris_data = [
+    [5.1,3.5,1.4,0.2,"Iris-setosa"],
+    [4.9,3.0,1.4,0.2,"Iris-setosa"],
+    [4.7,3.2,1.3,0.2,"Iris-setosa"],
+    [4.6,3.1,1.5,0.2,"Iris-setosa"],
+    [5.0,3.6,1.4,0.2,"Iris-setosa"],
+    # ... (continue until full 150 entries) ...
+    [6.5,3.0,5.2,2.0,"Iris-virginica"],
+    [6.2,3.4,5.4,2.3,"Iris-virginica"],
+    [5.9,3.0,5.1,1.8,"Iris-virginica"]
+]
+
+# Convert to arrays
+X = []
+y = []
+for row in iris_data:
+    X.append(row[:4])      # features
+    y.append(row[4])       # string label
+X = np.array(X, dtype=float)
+y = np.array(y)
+
+# Encode labels to integers
+unique_labels = list(set(y))
+label_map = {lbl:i for i,lbl in enumerate(unique_labels)}
+y_num = np.array([label_map[lbl] for lbl in y])
+
+# Shuffle and split dataset (80% train, 20% test)
+np.random.seed(42)
+indices = np.random.permutation(len(X))
+split_index = int(0.8 * len(X))
+train_idx = indices[:split_index]
+test_idx = indices[split_index:]
+
+X_train, y_train = X[train_idx], y_num[train_idx]
+X_test,  y_test  = X[test_idx],  y_num[test_idx]
+
+# Euclidean distance function
+def euclidean_dist(a, b):
+    return np.sqrt(np.sum((a - b) ** 2))
+
+# KNN prediction
+def knn_predict(X_train, y_train, X_test, k=5):
+    preds = []
+    for pt in X_test:
+        dists = [euclidean_dist(pt, tr) for tr in X_train]
+        k_idx = np.argsort(dists)[:k]
+        k_labels = [y_train[i] for i in k_idx]
+        pred = max(set(k_labels), key=k_labels.count)
+        preds.append(pred)
+    return np.array(preds)
+
+# Run KNN and evaluate
+k = 5
+y_pred = knn_predict(X_train, y_train, X_test, k)
+
+accuracy = np.mean(y_pred == y_test) * 100
+print("Predicted labels:", y_pred.tolist())
+print("Actual labels   :", y_test.tolist())
+print(f"Accuracy: {accuracy:.2f}%")
