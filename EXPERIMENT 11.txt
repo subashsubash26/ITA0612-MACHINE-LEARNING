@@ -1,0 +1,75 @@
+import numpy as np
+
+# Sigmoid activation function
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+# Train logistic regression model
+def train_logistic_regression(X, y, lr=0.1, iterations=2000):
+    m, n = X.shape
+    weights = np.zeros(n)
+    bias = 0
+    
+    for i in range(iterations):
+        linear_model = X.dot(weights) + bias
+        preds = sigmoid(linear_model)
+        
+        # Gradients
+        dw = (1/m) * X.T.dot(preds - y)
+        db = (1/m) * np.sum(preds - y)
+        
+        # Update parameters
+        weights -= lr * dw
+        bias -= lr * db
+
+    return weights, bias
+
+# Predict function
+def predict(X, weights, bias):
+    prob = sigmoid(X.dot(weights) + bias)
+    return (prob >= 0.5).astype(int)
+
+# ============================
+# Example synthetic dataset
+# ============================
+
+# Features: [age, income (in $10000s), debt_ratio]
+X = np.array([
+    [25, 3.5, 0.2],
+    [40, 8.0, 0.1],
+    [22, 2.0, 0.6],
+    [35, 6.0, 0.4],
+    [50, 10.0, 0.1],
+    [28, 4.0, 0.5],
+    [42, 7.5, 0.3],
+    [30, 5.0, 0.6],
+    [60, 12.0, 0.2],
+    [20, 1.8, 0.7]
+])
+
+# Labels: 1 = Good credit, 0 = Bad credit
+y = np.array([1, 1, 0, 1, 1, 0, 1, 0, 1, 0])
+
+# Train/test split
+np.random.seed(123)
+indices = np.random.permutation(len(X))
+train_idx = indices[:8]
+test_idx = indices[8:]
+
+X_train, y_train = X[train_idx], y[train_idx]
+X_test, y_test = X[test_idx], y[test_idx]
+
+# Train
+weights, bias = train_logistic_regression(X_train, y_train, lr=0.15, iterations=3000)
+
+# Predict
+y_pred = predict(X_test, weights, bias)
+
+# Accuracy
+accuracy = np.mean(y_pred == y_test)
+
+print("Weights:", weights)
+print("Bias:", bias)
+print("Predicted labels:", y_pred.tolist())
+print("True labels     :", y_test.tolist())
+print(f"Accuracy: {accuracy*100:.2f}%")
