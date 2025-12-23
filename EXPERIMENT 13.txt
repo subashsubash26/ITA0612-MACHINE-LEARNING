@@ -1,0 +1,67 @@
+import numpy as np
+
+# ----------------------------
+# Sample Car Dataset (toy data)
+# ----------------------------
+# Columns: [year, kms_driven, fuel_type_encoded, owner_count]
+# Target: price (in thousands)
+X = np.array([
+    [2015, 50000, 0, 1],
+    [2012, 80000, 1, 2],
+    [2018, 30000, 0, 1],
+    [2016, 45000, 1, 1],
+    [2014, 70000, 0, 2],
+    [2019, 25000, 0, 1],
+    [2013, 60000, 1, 2],
+    [2017, 35000, 0, 1]
+], dtype=float)
+
+# Prices in thousands
+y = np.array([5.0, 3.5, 7.5, 6.5, 4.0, 8.0, 4.2, 7.0])
+
+# --------------------------------
+# Normalize features for training
+# --------------------------------
+# Feature scaling (min-max)
+X_min = X.min(axis=0)
+X_max = X.max(axis=0)
+X_scaled = (X - X_min) / (X_max - X_min)
+
+# --------------------------------
+# Add bias (intercept) column
+# --------------------------------
+X_scaled = np.hstack((np.ones((X_scaled.shape[0], 1)), X_scaled))
+
+# --------------------------
+# Train Linear Regression
+# --------------------------
+# Closed form solution: theta = (X^T X)^(-1) X^T y
+theta = np.linalg.inv(X_scaled.T.dot(X_scaled)).dot(X_scaled.T).dot(y)
+
+print("Trained coefficients (theta):", theta)
+
+# --------------------------
+# Evaluate on training data
+# --------------------------
+predictions = X_scaled.dot(theta)
+
+# RMSE (Root Mean Squared Error)
+rmse = np.sqrt(np.mean((predictions - y) ** 2))
+print(f"RMSE on training data: {rmse:.2f} thousands")
+
+# --------------------------
+# Predict price for new car(s)
+# --------------------------
+# New example cars: year=2018, kms=40000, petrol=0, owner=1
+new_cars = np.array([
+    [2018, 40000, 0, 1],
+    [2015, 75000, 1, 2]
+], dtype=float)
+
+# Scale new car data
+new_scaled = (new_cars - X_min) / (X_max - X_min)
+new_scaled = np.hstack((np.ones((new_scaled.shape[0], 1)), new_scaled))
+
+new_predictions = new_scaled.dot(theta)
+for i, price in enumerate(new_predictions):
+    print(f"Predicted price for car {i+1}: {price:.2f} thousands")
